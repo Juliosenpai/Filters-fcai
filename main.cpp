@@ -1,6 +1,15 @@
+// Task: CS112_A3_Part1_S19-20_20230026_20230108_20230133.cpp
+// Part-1: 8 filters implemented
+// Filters implemented by Ahmed Atef Adel | ID : 20230026: Merge filter , Darken filter-Lighten filter , Grayscale Filter , Detect Image edges Filter
+// Filters implemented by Juliano Joseph Kamal | ID: 20230108: Crop Filter , Black and White Filter
+// Filters implemented by Dany Ashraf Eryan | ID: 20230133: Invert Filter , Rotate Filter
+//  Menu implemented by Dany Ashraf Eryan - 20230133 , Ahmed Atef Adel - 20230026
+// Version : 4.0
+
 #include <iostream>
 #include "Image_Class.h"
 #include <string>
+#include <cmath>
 
 using namespace std;
 
