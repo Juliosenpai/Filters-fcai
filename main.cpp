@@ -162,76 +162,118 @@ Image lighten(Image &firstImage)
     save_photo(firstImage);
     return firstImage;
 }
-Image detect2(Image &firstImage)
+Image sobelBlackToWhite(Image &inputImage)
 {
-    // checking for pixels in the black and white image
-    for (int i = 2; i < firstImage.width - 2; i++)
+    for (int i = 0; i < inputImage.width; i++)
     {
-        for (int j = 2; j < firstImage.height - 2; j++)
+        for (int j = 0; j < inputImage.height; j++)
         {
             for (int k = 0; k < 3; k++)
             {
-                // check if pixel is white and neighbour pixel is black and creating edge accordingly
-                if (firstImage(i, j, k) == 255 && firstImage(i + 1, j, k) == 0)
-                {
-                    for (int l = -2; l <= 2; l++)
-                    {
-                        for (int m = -2; m <= 2; m++)
-                        {
-                            if (l != 0 || m != 0)
-                            {
-                                firstImage(i + l, j + m, k) = 0;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    firstImage(i, j, k) = 255;
-                }
+                inputImage(i, j, k) = (inputImage(i, j, k) == 0) ? 255 : 0;
             }
-        }
+        };
     }
-    // save image
-    save_photo(firstImage);
-    return firstImage;
+    // saving image
+    save_photo(inputImage);
+    return inputImage;
 }
-void detectImageEdges(Image &firstImage)
+void sobelEdgeDetection(Image &inputImage)
 {
-
-    cout << "welcome to the detect edges filter" << endl;
-    // convert image into black and white
-    unsigned int average;
-    average = 0;
-    for (int i = 0; i < firstImage.width; i++)
+    Image outputImage(inputImage.width, inputImage.height);
+    int Xoperator[3][3] = {{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}};
+    int Yoperator[3][3] = {{1, 2, 1}, {0, 0, 0}, {-1, -2, -1}};
+    unsigned int maxPixelValue = 0;
+    for (int i = 0; i < inputImage.width; i++)
     {
-        for (int j = 0; j < firstImage.height; j++)
+        for (int j = 0; j < inputImage.height; j++)
         {
-            for (int k = 0; k < 3; k++)
+            for (int k = 0; k < inputImage.channels; k++)
             {
-                // getting the average of the pixel
-                average += firstImage(i, j, k);
-            }
-            average /= 3;
-            for (int k = 0; k < 3; k++)
-            {
-                if (average >= 127)
-                {
-                    // setting pixel to white if the average of the pixel is more than or equal 127
-                    firstImage(i, j, k) = 255;
-                }
-                else
-                {
-                    // setting pixel to black if the average of the pixel is less than 127
-                    firstImage(i, j, k) = 0;
-                }
+                maxPixelValue = max(maxPixelValue, static_cast<unsigned int>(inputImage(i, j, k)));
             }
         }
     }
-    // applying image detection to black and white image without saving
-    detect2(firstImage);
+
+    // Calculate the dynamic threshold as a percentage of the maximum pixel value
+
+    for (int i = 1; i < inputImage.width - 1; i++)
+    {
+        for (int j = 1; j < inputImage.height - 1; j++)
+        {
+            int xVal = 0;
+            int yVal = 0;
+
+            for (int k = -1; k <= 1; k++)
+            {
+                for (int l = -1; l <= 1; l++)
+                {
+                    int intensity = inputImage(i + k, j + l, 0);
+
+                    xVal += Xoperator[k + 1][l + 1] * inputImage(i + k, j + l, 0);
+                    yVal += Yoperator[k + 1][l + 1] * inputImage(i + k, j + l, 0);
+                }
+            }
+            int threshold = sqrt((pow(abs(xVal), 2)) + (pow(abs(yVal), 2)));
+
+            int angle = atan2(yVal, xVal) * (180.0 / M_PI);
+            angle += 180;
+
+            int pixel1, pixel2;
+            if ((angle >= 0 && angle < 22.5) || (angle >= 157.5 && angle <= 180))
+            {
+                pixel1 = inputImage(i, j - 1, 0);
+                pixel2 = inputImage(i, j + 1, 0);
+            }
+            else if (angle >= 22.5 && angle < 67.5)
+            {
+                pixel1 = inputImage(i - 1, j + 1, 0);
+                pixel2 = inputImage(i + 1, j - 1, 0);
+            }
+            else if (angle >= 67.5 && angle < 112.5)
+            {
+                pixel1 = inputImage(i - 1, j, 0);
+                pixel2 = inputImage(i + 1, j, 0);
+            }
+            else if (angle >= 112.5 && angle < 157.5)
+            {
+                pixel1 = inputImage(i - 1, j - 1, 0);
+                pixel2 = inputImage(i + 1, j + 1, 0);
+            }
+
+            // Perform Non-Maximum Suppression
+            if (threshold > pixel1 && threshold > pixel2)
+            {
+                outputImage(i, j, 0) = outputImage(i, j, 1) = outputImage(i, j, 2) = threshold;
+            }
+            else
+            {
+                outputImage(i, j, 0) = outputImage(i, j, 1) = outputImage(i, j, 2) = 0;
+            }
+        }
+    }
+    sobelBlackToWhite(outputImage);
 }
 
+void edgeDetect(Image &inputImage)
+{
+    Image grayscaleImage(inputImage.width, inputImage.height);
+    cout << "Welcome to the edge detection filter" << endl;
+    // looping on image pixels and channels
+    for (int i = 0; i < inputImage.width; i++)
+    {
+        for (int j = 0; j < inputImage.height; j++)
+        {
+            // Calculate luminance using this specific formula
+            unsigned char luminance = static_cast<unsigned char>(
+                0.299 * inputImage(i, j, 0) + 0.587 * inputImage(i, j, 1) + 0.114 * inputImage(i, j, 2));
+
+            // Set the grayscale pixel to the luminance value
+            grayscaleImage(i, j, 0) = grayscaleImage(i, j, 1) = grayscaleImage(i, j, 2) = luminance;
+        }
+    }
+    sobelEdgeDetection(inputImage);
+}
 Image crop(Image &image)
 {
     int x, z, a, b;
@@ -466,7 +508,7 @@ void applyFilter(Image &image, int filterChoice)
         }
         break;
     case 8:
-        detectImageEdges(image);
+        edgeDetect(image);
         break;
     default:
         cout << "Invalid filter choice. Please try again." << endl;
