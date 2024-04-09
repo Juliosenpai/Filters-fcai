@@ -171,6 +171,109 @@ Image lighten(Image &firstImage)
     save_photo(firstImage);
     return firstImage;
 }
+Image violetEffect(Image &firstImage)
+{
+
+    cout << "__Welcome to purple Filter__" << endl;
+    // looping on image pixels and channels
+    for (int i = 0; i < firstImage.width; i++)
+    {
+        for (int j = 0; j < firstImage.height; j++)
+        {
+
+            int newRedValue = firstImage(i, j, 0) * 1.5;  // Increase red channel
+            int newBlueValue = firstImage(i, j, 2) * 1.6; // Decrease blue channel
+
+            firstImage(i, j, 0) = min(newRedValue, 255);
+            firstImage(i, j, 2) = min(newBlueValue, 255);
+        };
+    }
+    for (int i = 0; i < firstImage.width; i++)
+    {
+        for (int j = 0; j < firstImage.height; j++)
+        {
+            for (int k = 0; k < firstImage.channels; k++)
+            {
+                int newValue = firstImage(i, j, k) / 1.2;
+                firstImage(i, j, k) = min(newValue, 255);
+            }
+        };
+    }
+    // saving image
+    save_photo(firstImage);
+    return firstImage;
+}
+Image infrared(Image &firstImage)
+{
+
+    cout << "__Welcome to infrared Filter__" << endl;
+    int average;
+    // looping on image pixels and channels
+    for (int i = 0; i < firstImage.width; i++)
+    {
+        for (int j = 0; j < firstImage.height; j++)
+        {
+            for (int k = 0; k < 3; k++)
+            {
+                // Increase red channel and brightness in darker areas
+                firstImage(i, j, k) = 255 - firstImage(i, j, k);
+                average += firstImage(i, j, k); // Invert red channel
+                                                // Invert blue channel
+            }
+            average /= 3;
+            firstImage(i, j, 0) = min(firstImage(i, j, 0) + 150, 255);
+            // firstImage(i, j, 1) = max(firstImage(i, j, 1), 0);
+            // firstImage(i, j, 2) = max(firstImage(i, j, 2), 0);
+            if (average < 128)
+            {
+                for (int k = 0; k < 3; k++)
+                {
+                    // multiply pixel value by 1.5 and choosing 255 if pixel is more than that
+                    int newValue = firstImage(i, j, k) * 1.6;
+                    firstImage(i, j, k) = min(newValue, 255);
+                }
+            }
+            else
+            {
+                for (int k = 0; k < 3; k++)
+                {
+                    // multiply pixel value by 1.5 and choosing 255 if pixel is more than that
+                    int newValue = firstImage(i, j, k) * 1.05;
+                    firstImage(i, j, k) = min(newValue, 255);
+                }
+            }
+        };
+    }
+
+    // saving image
+    save_photo(firstImage);
+    return firstImage;
+};
+Image sepiaEffect(Image &firstImage)
+{
+
+    for (int i = 0; i < firstImage.width; i++)
+    {
+        for (int j = 0; j < firstImage.height; j++)
+        {
+            int originalRed = firstImage(i, j, 0);
+            int originalGreen = firstImage(i, j, 1);
+            int originalBlue = firstImage(i, j, 2);
+
+            // Apply sepia transformation
+            int newRed = min(static_cast<int>(round(0.393 * originalRed + 0.769 * originalGreen + 0.189 * originalBlue)), 255);
+            int newGreen = min(static_cast<int>(round(0.349 * originalRed + 0.686 * originalGreen + 0.168 * originalBlue)), 255);
+            int newBlue = min(static_cast<int>(round(0.272 * originalRed + 0.534 * originalGreen + 0.131 * originalBlue)), 255);
+
+            firstImage(i, j, 0) = newRed;
+            firstImage(i, j, 1) = newGreen;
+            firstImage(i, j, 2) = newBlue;
+        }
+    }
+    save_photo(firstImage);
+    return firstImage;
+}
+
 Image sobelBlackToWhite(Image &inputImage)
 {
     for (int i = 0; i < inputImage.width; i++)
@@ -519,6 +622,12 @@ void applyFilter(Image &image, int filterChoice)
     case 8:
         edgeDetect(image);
         break;
+    case 9:
+        violetEffect(image);
+    case 10:
+        infrared(image);
+    case 11:
+        sepiaEffect(image);
     default:
         cout << "Invalid filter choice. Please try again." << endl;
     }
@@ -595,9 +704,9 @@ void menu()
                 if (choice == 1)
                 {
                     cout << "You want me to filter" << endl;
-                    cout << "1-Grayscale Conversion\n2-Black and White \n3-Invert Image\n4-merge Images\n5-crop Images\n6-Rotate Image\n7-darken or lighten\n8-detect edges\n: ";
+                    cout << "1-Grayscale Conversion\n2-Black and White \n3-Invert Image\n4-merge Images\n5-crop Images\n6-Rotate Image\n7-darken or lighten\n8-detect edges\n9-Wano(violet)\n10-infrared effect\n11-sepiaEffect\n: ";
                     cin >> no_filter;
-                    while (!(no_filter > 0 && no_filter < 9))
+                    while (!(no_filter > 0 && no_filter < 12))
                     {
                         cout << "Please enter a valid input: ";
                         cin.clear();
