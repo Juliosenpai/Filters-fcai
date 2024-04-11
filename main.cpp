@@ -677,6 +677,30 @@ Image frame2(Image &image) {
     save_photo(image);
     return image;
 }
+Image skew(Image& image){
+    double skewAngle = tan(40.0 * M_PI / 180.0);
+    int skewedWidth = image.width + static_cast<int>(image.height * skewAngle);
+    int skewedHeight = image.height;
+    // Create a new image with the skewed dimensions
+    Image image2(skewedWidth, skewedHeight);
+    // Apply the affine transformation to the image
+    for (int j = 0; j < image.height; ++j) {
+        for (int i = 0; i < image.width; ++i) {
+            // Calculate the corresponding coordinates in the original image
+            int originalX =i + static_cast<int>((image.height-1-j) * skewAngle);
+            int originalY = j;
+            // Check if the original coordinates are within bounds
+            // Copy pixel values from the original image
+            for (int k = 0; k < image.channels; ++k) {
+                image2(originalX, originalY, k) = image(i, j, k) ;
+
+            }
+
+        }
+    }
+    save_photo(image2);
+    return  image2;
+}
 void applyFilter(Image &image, int filterChoice)
 {
     int answer;
@@ -778,6 +802,9 @@ void applyFilter(Image &image, int filterChoice)
             break;
         case 14:
             sunlight(image);
+            break;
+        case 15:
+            skew(image);
             break;
         default:
             cout << "Invalid filter choice. Please try again." << endl;
@@ -890,3 +917,4 @@ int main()
     menu();
     return 0;
 }
+
