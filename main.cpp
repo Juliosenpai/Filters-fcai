@@ -1,3 +1,4 @@
+
 // Task: CS112_A3_Part1_S19-20_20230026_20230108_20230133.cpp
 // Part-1: 8 filters implemented
 // Filters implemented by Ahmed Atef Adel | ID : 20230026: Merge filter , Darken filter-Lighten filter , Grayscale Filter , Detect Image edges Filter
@@ -5,14 +6,11 @@
 // Filters implemented by Dany Ashraf Eryan | ID: 20230133: Invert Filter , Rotate Filter
 //  Menu implemented by Dany Ashraf Eryan - 20230133 , Ahmed Atef Adel - 20230026
 // Version : 4.0
-
 #include <iostream>
 #include "Image_Class.h"
 #include <string>
 #include <cmath>
-
 using namespace std;
-
 Image save_photo(Image &image)
 {
     string save, save_type;
@@ -36,6 +34,50 @@ Image save_photo(Image &image)
 
     save = save + "." + save_type;
     image.saveImage(save);
+}
+Image blur( Image &image) {
+
+
+
+    for (int i = 0; i < image.width; ++i) {
+        for (int j = 0; j < image.height; ++j) {
+            for (int k = 0; k < 3; ++k) {
+                int sum = 0;
+                int count = 0;
+                for (int l = -8; l <= 8; ++l) {
+                    for (int m = -8; m <= 8; ++m) {
+                        int ni = i + l;
+                        int nj = j + m;
+                        if (ni >= 0 && ni < image.width && nj >= 0 && nj < image.height) {
+                            sum += image(ni, nj, k);
+                            count++;
+                        }
+                    }
+                }
+                image(i, j, k) = sum / 302;
+            }
+        }
+    }
+    save_photo(image);
+    return  image;
+}
+Image sunlight(Image & image){
+    for (int i = 0; i < image.width; ++i) {
+        for (int j = 0; j < image.height; ++j) {
+            for (int k = 0; k < 2; k++) {
+                unsigned char pixelValue = image(i, j, k);
+                if (k == 0) {
+                    // Increase brightness for the red channel
+                    image.setPixel(i, j, k, min(255, pixelValue + 40));
+                } else if (k == 1) {
+                    // Leave the green channel unchanged
+                    image.setPixel(i, j, k, min(255, pixelValue + 40));
+                }
+            }
+        }
+    }
+    save_photo(image);
+    return image;
 }
 Image merge(Image &firstImage)
 {
@@ -128,7 +170,6 @@ Image darken(Image &firstImage)
     save_photo(firstImage);
     return firstImage;
 };
-
 Image greyScale(Image &firstImage)
 
 {
@@ -141,7 +182,7 @@ Image greyScale(Image &firstImage)
         {
             // Calculate luminance using this specific formula
             unsigned char luminance = static_cast<unsigned char>(
-                0.2126 * firstImage(i, j, 0) + 0.7152 * firstImage(i, j, 1) + 0.0722 * firstImage(i, j, 2));
+                    0.2126 * firstImage(i, j, 0) + 0.7152 * firstImage(i, j, 1) + 0.0722 * firstImage(i, j, 2));
 
             // Set the grayscale pixel to the luminance value
             grayscaleImage(i, j, 0) = grayscaleImage(i, j, 1) = grayscaleImage(i, j, 2) = luminance;
@@ -218,7 +259,7 @@ Image infrared(Image &firstImage)
                 // Increase red channel and brightness in darker areas
                 firstImage(i, j, k) = 255 - firstImage(i, j, k);
                 average += firstImage(i, j, k); // Invert red channel
-                                                // Invert blue channel
+                // Invert blue channel
             }
             average /= 3;
             firstImage(i, j, 0) = min(firstImage(i, j, 0) + 150, 255);
@@ -273,7 +314,6 @@ Image sepiaEffect(Image &firstImage)
     save_photo(firstImage);
     return firstImage;
 }
-
 Image sobelBlackToWhite(Image &inputImage)
 {
     for (int i = 0; i < inputImage.width; i++)
@@ -366,7 +406,6 @@ void sobelEdgeDetection(Image &inputImage)
     }
     sobelBlackToWhite(outputImage);
 }
-
 void edgeDetect(Image &inputImage)
 {
     Image grayscaleImage(inputImage.width, inputImage.height);
@@ -378,7 +417,7 @@ void edgeDetect(Image &inputImage)
         {
             // Calculate luminance using this specific formula
             unsigned char luminance = static_cast<unsigned char>(
-                0.299 * inputImage(i, j, 0) + 0.587 * inputImage(i, j, 1) + 0.114 * inputImage(i, j, 2));
+                    0.299 * inputImage(i, j, 0) + 0.587 * inputImage(i, j, 1) + 0.114 * inputImage(i, j, 2));
 
             // Set the grayscale pixel to the luminance value
             grayscaleImage(i, j, 0) = grayscaleImage(i, j, 1) = grayscaleImage(i, j, 2) = luminance;
@@ -413,7 +452,6 @@ Image crop(Image &image)
     save_photo(image2);
     return image2;
 }
-
 Image BW(Image &image)
 {
     // Convert the loaded image to grayscale
@@ -489,7 +527,6 @@ Image Invert_Image(Image &image)
     save_photo(image);
     return image;
 }
-
 Image flip_90(Image &image)
 {
     Image flippedImage(image.height, image.width);
@@ -506,13 +543,11 @@ Image flip_90(Image &image)
     save_photo(flippedImage);
     return flippedImage;
 }
-
-// Function to flip the image by 180 degrees
 Image flip_180(Image &image)
 {
-    Image flippedImage(image.width, image.height); // Create a new image to store the flipped result
+    Image flippedImage(image.width, image.height);
 
-    // Flip the image 180 degrees
+
     for (int i = 0; i < image.width; ++i)
     {
         for (int j = 0; j < image.height; ++j)
@@ -527,8 +562,6 @@ Image flip_180(Image &image)
     save_photo(flippedImage);
     return flippedImage;
 }
-
-// Function to flip the image by 270 degrees
 Image flip_270(Image &image)
 {
     Image flippedImage(image.height, image.width); // Create a new image to store the flipped result
@@ -548,89 +581,208 @@ Image flip_270(Image &image)
     save_photo(flippedImage);
     return flippedImage;
 }
+Image frame(Image &image) {
 
+    cout << "What color of firm do you need?\n1-black\n2-red\n4-white\n3-blue\n";
+    int color;
+    cin >> color;
+    while (color < 1 || color > 3) {
+        cout << "Please enter a valid input: ";
+        cin >> color;
+    }
+    for (int i = 0; i < image.width; ++i) {
+        for (int j = 0; j < image.height; ++j) {
+            for (int k = 0; k < 3; ++k) {
+                if (i < 20 || j < 20 || i >= image.width - 20 || j >= image.height - 20) {
+                    if (color == 1) {
+                        image(i, j, k) = 0; // Set pixel to black
+                    } else if (color == 2) {
+                        image(i, j, 0) = 255; // Set red channel to max
+                        image(i, j, 1) = 0;   // Set green channel to min
+                        image(i, j, 2) = 0;   // Set blue channel to min
+                    } else if (color==3){
+                        image(i, j, 0) = 255;   // Set red channel to min
+                        image(i, j, 1) = 255;   // Set green channel to min
+                        image(i, j, 2) = 255; // Set blue channel to max
+
+                    }
+
+
+
+
+                    else {
+                        image(i, j, 0) = 0;   // Set red channel to min
+                        image(i, j, 1) = 0;   // Set green channel to min
+                        image(i, j, 2) = 255; // Set blue channel to max
+                    }
+                }
+            }
+        }
+    }
+    save_photo(image);
+    return image;
+}
+Image frame2(Image &image) {
+    cout << "What color of firm do you need?\n1-black\n2-red\n4-white\n3-blue\n";
+    int color;
+    cin >> color;
+    while (color < 1 || color > 3) {
+        cout << "Please enter a valid input: ";
+        cin >> color;
+    }
+    for (int i = 0; i < image.width; ++i) {
+        for (int j = 0; j < image.height; ++j) {
+            for (int k = 0; k < image.channels; ++k) {
+                if (i < 20 || j < 20 || i >= image.width - 20 || j >= image.height - 20) {
+                    if (color == 1) {
+                        image(i, j, k) = 0; // Set pixel to black
+                    } else if (color == 2) {
+                        image(i, j, 0) = 255; // Set red channel to max
+                        image(i, j, 1) = 0;   // Set green channel to min
+                        image(i, j, 2) = 0;   // Set blue channel to min
+                    } else if (color == 3) {
+                        image(i, j, 0) = 255;   // Set red channel to min
+                        image(i, j, 1) = 255;   // Set green channel to min
+                        image(i, j, 2) = 255; // Set blue channel to max
+
+                    } else {
+                        image(i, j, 0) = 0;   // Set red channel to min
+                        image(i, j, 1) = 0;   // Set green channel to min
+                        image(i, j, 2) = 255; // Set blue channel to max
+                    }
+                }
+                // Setting pixels in the specified region to black in the blue channel
+                if ((i < 30 && i > 25) || (j < 30 && j > 25) || (i > image.width - 30 && i < image.width - 25) ||
+                    (j > image.height - 30 && j < image.height - 25)) {
+                    if (color == 1) {
+                        image(i, j, k) = 0; // Set pixel to black
+                    } else if (color == 2) {
+                        image(i, j, 0) = 255; // Set red channel to max
+                        image(i, j, 1) = 0;   // Set green channel to min
+                        image(i, j, 2) = 0;   // Set blue channel to min
+                    } else if (color == 3) {
+                        image(i, j, 0) = 255;   // Set red channel to min
+                        image(i, j, 1) = 255;   // Set green channel to min
+                        image(i, j, 2) = 255; // Set blue channel to max
+
+                    } else {
+                        image(i, j, 0) = 0;   // Set red channel to min
+                        image(i, j, 1) = 0;   // Set green channel to min
+                        image(i, j, 2) = 255; // Set blue channel to max
+                    }
+                }
+            }
+        }
+    }
+    save_photo(image);
+    return image;
+}
 void applyFilter(Image &image, int filterChoice)
 {
     int answer;
     switch (filterChoice)
     {
-    case 1:
-        // Grayscale Conversion
-        greyScale(image);
-        break;
-    case 2:
-        BW(image);
-        break;
-    case 3:
-        // Invert Image
-        Invert_Image(image);
-        break;
-    case 4:
-        // Merge images
-        merge(image);
-        // Implement image merging
-        break;
-    case 5:
-        // crop Images
-        crop(image);
-        // Implement image cropping
-        break;
-    case 6:
-        cout << "How many degrees do you want to rotate the image ?\n1-90\n2-180\n3-270\n";
-        cin >> answer;
-        while (!(answer > 0 && answer < 4))
-        {
-            cout << "Please enter a valid input: ";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        case 1:
+            // Grayscale Conversion
+            greyScale(image);
+            break;
+        case 2:
+            BW(image);
+            break;
+        case 3:
+            // Invert Image
+            Invert_Image(image);
+            break;
+        case 4:
+            // Merge images
+            merge(image);
+            // Implement image merging
+            break;
+        case 5:
+            // crop Images
+            crop(image);
+            // Implement image cropping
+            break;
+        case 6:
+            cout << "How many degrees do you want to rotate the image ?\n1-90\n2-180\n3-270\n";
             cin >> answer;
-        }
-        if (answer == 1)
-        {
-            flip_90(image);
-        }
-        else if (answer == 2)
-        {
-            flip_180(image);
-        }
-        else
-        {
-            flip_270(image);
-        }
-        break;
-    case 7:
-        // darken or lighten image
-        int darkOrLight;
-        cout << "Choose filter\n1-Darken\n2-lighten\n: ";
-        cin >> darkOrLight;
-        while (!(darkOrLight > 0 && darkOrLight < 3))
-        {
-            cout << "Please enter a valid input: ";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            while (!(answer > 0 && answer < 4))
+            {
+                cout << "Please enter a valid input: ";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cin >> answer;
+            }
+            if (answer == 1)
+            {
+                flip_90(image);
+            }
+            else if (answer == 2)
+            {
+                flip_180(image);
+            }
+            else
+            {
+                flip_270(image);
+            }
+            break;
+        case 7:
+            // darken or lighten image
+            int darkOrLight;
+            cout << "Choose filter\n1-Darken\n2-lighten\n: ";
             cin >> darkOrLight;
-        }
-        if (darkOrLight == 1)
-        {
-            darken(image);
-        }
-        else if (darkOrLight == 2)
-        {
-            lighten(image);
-        }
-        break;
-    case 8:
-        edgeDetect(image);
-        break;
-    case 9:
-        violetEffect(image);
-    case 10:
-        infrared(image);
-    case 11:
-        sepiaEffect(image);
-    default:
-        cout << "Invalid filter choice. Please try again." << endl;
+            while (!(darkOrLight > 0 && darkOrLight < 3))
+            {
+                cout << "Please enter a valid input: ";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cin >> darkOrLight;
+            }
+            if (darkOrLight == 1)
+            {
+                darken(image);
+            }
+            else if (darkOrLight == 2)
+            {
+                lighten(image);
+            }
+            break;
+        case 8:
+            edgeDetect(image);
+            break;
+        case 9:
+            violetEffect(image);
+            break;
+        case 10:
+            infrared(image);
+            break;
+        case 11:
+            sepiaEffect(image);
+            break;
+        case 12:
+            cout << "Which frame do you need?\n1 - simple\n2 - fancy\n";
+            int a;
+            cin >> a;
+            while (a != 1 && a != 2) { // Change here
+                cout << "Please enter valid input: ";
+                cin >> a;
+            }
+            if (a == 1) {
+                frame(image);
+            } else {
+                frame2(image);
+            }
+            break;
+        case 13:
+            blur(image);
+            break;
+        case 14:
+            sunlight(image);
+            break;
+        default:
+            cout << "Invalid filter choice. Please try again." << endl;
     }
+
 }
 void menu()
 {
