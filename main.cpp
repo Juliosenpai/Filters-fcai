@@ -39,10 +39,17 @@ Image save_photo(Image &image)
 
     save = save + "." + save_type;
 
-    image.saveImage(save);
+    try
+    {
+        image.saveImage(save); // Save the image immediately
 
-    cout << "Image saved as " << save << endl;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Image saved as " << save << endl;
+    }
+    catch (const invalid_argument &e)
+    {
+        cerr << "Error: " << e.what() << endl;
+        return image; // Return the original image if saving fails
+    }
 
     int n;
     cout << "1-Continue\n2-Exit" << endl;
@@ -52,7 +59,7 @@ Image save_photo(Image &image)
         cin >> n;
         if (n == 1)
         {
-
+            image.saveImage(save);
             menu(); // Call the menu function to return to the main menu
             break;
         }
@@ -1040,6 +1047,7 @@ void menu()
     Image image;
 
     cout << "__Welcome to mini photoshop__" << endl;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cout << "What's your name? ";
 
     getline(cin, name);
