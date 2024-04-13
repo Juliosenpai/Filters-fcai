@@ -1,15 +1,19 @@
 
 // Task: CS112_A3_Part1_S19-20_20230026_20230108_20230133.cpp
-// Part-1: 8 filters implemented
-// Filters implemented by Ahmed Atef Adel | ID : 20230026: Merge filter , Darken filter-Lighten filter , Grayscale Filter , Detect Image edges Filter
-// Filters implemented by Juliano Joseph Kamal | ID: 20230108: Crop Filter , Black and White Filter
-// Filters implemented by Dany Ashraf Eryan | ID: 20230133: Invert Filter , Rotate Filter
+// Part-1: 18 filters implemented
+// Filters implemented by Ahmed Atef Adel | ID : 20230026: Merge filter , Darken filter-Lighten filter , Grayscale Filter , Detect Image edges Filter , Violet Effect Filter, Infrared Filter , Sepia Filter
+// Filters implemented by Juliano Joseph Kamal | ID: 20230108: Crop Filter , Black and White Filter , Oil paint Filter , Flip filter , Resize filter.
+// Filters implemented by Dany Ashraf Eryan | ID: 20230133: Invert Filter , Rotate Filter ,
 //  Menu implemented by Dany Ashraf Eryan - 20230133 , Ahmed Atef Adel - 20230026
 // Version : 4.0
 #include <iostream>
 #include "Image_Class.h"
 #include <string>
 #include <cmath>
+#include <vector>
+#include <algorithm>
+#include <limits>
+#include <ios>
 using namespace std;
 Image save_photo(Image &image)
 {
@@ -66,6 +70,146 @@ Image blur(Image &image)
     save_photo(image);
     return image;
 }
+Image oil_paint(Image &image)
+{
+    int neighborhoodSize = 3; // Adjust the neighborhood size as needed
+    Image resultImage(image.width, image.height);
+
+    // Loop through each pixel in the image
+#pragma omp parallel for
+    for (int y = 0; y < image.height; ++y)
+    {
+        for (int x = 0; x < image.width; ++x)
+        {
+            // Arrays to count occurrences of each color component
+            vector<int> colorCountR(256, 0);
+            vector<int> colorCountG(256, 0);
+            vector<int> colorCountB(256, 0);
+
+            // Count colors in the neighborhood
+            for (int j = -neighborhoodSize; j <= neighborhoodSize; ++j)
+            {
+                for (int i = -neighborhoodSize; i <= neighborhoodSize; ++i)
+                {
+                    int nx = min(max(x + i, 0), image.width - 1);
+                    int ny = min(max(y + j, 0), image.height - 1);
+
+                    unsigned char r = image(nx, ny, 0);
+                    unsigned char g = image(nx, ny, 1);
+                    unsigned char b = image(nx, ny, 2);
+
+                    colorCountR[r]++;
+                    colorCountG[g]++;
+                    colorCountB[b]++;
+                }
+            }
+
+            // Find the most common color for each component
+            int mostCommonR = max_element(colorCountR.begin(), colorCountR.end()) - colorCountR.begin();
+            int mostCommonG = max_element(colorCountG.begin(), colorCountG.end()) - colorCountG.begin();
+            int mostCommonB = max_element(colorCountB.begin(), colorCountB.end()) - colorCountB.begin();
+
+            // Set pixel values to the most common color
+            resultImage(x, y, 0) = mostCommonR;
+            resultImage(x, y, 1) = mostCommonG;
+            resultImage(x, y, 2) = mostCommonB;
+        }
+    }
+    save_photo(resultImage);
+    return resultImage;
+}
+Image flip(Image &image)
+{
+    // Load the image
+
+    int a;
+    do
+    {
+        cout << "please enter your choice" << endl;
+        cout << "1-Horizontal flip" << endl
+             << "2-Vertical flip" << endl;
+        cin >> a;
+
+    } while (a != 1 && a != 2); // Use && instead of || here
+
+    if (a == 1)
+    {
+        // Horizontal flip
+        for (int j = 0; j < image.height; ++j)
+        {
+            for (int i = 0; i < image.width / 2; ++i)
+            {
+                // Swap pixels between the right and left sides of the image
+                for (int k = 0; k < image.channels; ++k)
+                {
+                    unsigned int temp = image.getPixel(i, j, k);
+                    image.setPixel(i, j, k, image.getPixel(image.width - 1 - i, j, k));
+                    image.setPixel(image.width - 1 - i, j, k, temp);
+                }
+            }
+        }
+    }
+    else if (a == 2)
+    {
+        // Vertical flip
+        for (int i = 0; i < image.width; ++i)
+        {
+            for (int j = 0; j < image.height / 2; ++j)
+            {
+                // Swap pixels between the top and bottom sides of the image
+                for (int k = 0; k < image.channels; ++k)
+                {
+                    unsigned int temp = image.getPixel(i, j, k);
+                    image.setPixel(i, j, k, image.getPixel(i, image.height - 1 - j, k));
+                    image.setPixel(i, image.height - 1 - j, k, temp);
+                }
+            }
+        }
+    }
+    save_photo(image);
+    return image;
+}
+
+Image resize(Image &image)
+{
+    int a, b;
+    cout << "Please enter the desired width";
+    cin >> a;
+    cout << "Please enter the desired height";
+    cin >> b;
+    Image image2(a, b);
+    image.loadNewImage("toy1.jpg");
+
+    // Calculate scale ratios based on the dimensions of the original and target images
+    double scw = double(image.width) / image2.width;
+    double sch = double(image.height) / image2.height;
+
+    for (int j = 0; j < image2.height; j++)
+    {
+        for (int i = 0; i < image2.width; i++)
+        {
+            for (int k = 0; k < 3; k++)
+            { // Assuming RGB channels
+                // Calculate the corresponding pixel coordinates in the original image
+                int orig_i = int(j * sch);
+                int orig_j = int(i * scw);
+
+                // Ensure boundary conditions
+                orig_i = min(max(orig_i, 0), image.height - 1);
+                orig_j = min(max(orig_j, 0), image.width - 1);
+
+                // Get the pixel value from the original image and set it in the resized image
+                image2.setPixel(i, j, k, image.getPixel(orig_j, orig_i, k));
+            }
+        }
+    }
+
+    // Save the resized image
+    save_photo(image2);
+
+    return image2;
+}
+
 Image sunlight(Image &image)
 {
     for (int i = 0; i < image.width; ++i)
@@ -850,6 +994,15 @@ void applyFilter(Image &image, int filterChoice)
     case 15:
         skew(image);
         break;
+    case 16:
+        oil_paint(image);
+        break;
+    case 17:
+        resize(image);
+        break;
+    case 18:
+        flip(image);
+        break;
     default:
         cout << "Invalid filter choice. Please try again." << endl;
     }
@@ -926,9 +1079,9 @@ void menu()
                 if (choice == 1)
                 {
                     cout << "You want me to filter" << endl;
-                    cout << "1-Grayscale Conversion\n2-Black and White \n3-Invert Image\n4-merge Images\n5-crop Images\n6-Rotate Image\n7-darken or lighten\n8-detect edges\n9-(violet) effect\n10-infrared effect\n11-sepiaEffect\n12-frame\n13-Blur\n14-sunlight effect\n15-skew effect\n: ";
+                    cout << "1-Grayscale Conversion\n2-Black and White \n3-Invert Image\n4-merge Images\n5-crop Images\n6-Rotate Image\n7-darken or lighten\n8-detect edges\n9-(violet) effect\n10-infrared effect\n11-sepiaEffect\n12-frame\n13-Blur\n14-sunlight effect\n15-skew effect\n16-oil paint\n17-resize\n18-flip\n: ";
                     cin >> no_filter;
-                    while (!(no_filter > 0 && no_filter < 16))
+                    while (!(no_filter > 0 && no_filter < 19))
                     {
                         cout << "Please enter a valid input: ";
                         cin.clear();
