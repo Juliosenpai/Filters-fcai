@@ -10,7 +10,11 @@
 #include "Image_Class.h"
 #include <string>
 #include <cmath>
+#include <limits>
+#include <ios>
+
 using namespace std;
+void menu();
 Image save_photo(Image &image)
 {
     string save, save_type;
@@ -34,6 +38,7 @@ Image save_photo(Image &image)
 
     save = save + "." + save_type;
     image.saveImage(save);
+    menu();
 }
 Image blur(Image &image)
 {
@@ -859,9 +864,12 @@ void menu()
     string name;
     int choice, no_filter;
     Image image;
-
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cout << "__Welcome to mini photoshop__" << endl;
     cout << "What's your name? ";
+
     getline(cin, name);
+
     cout << "Hello Dr, " << name << endl;
 
     while (true)
@@ -940,6 +948,7 @@ void menu()
                 else if (choice == 2)
                 {
                     save_photo(image);
+                    break;
                 }
                 else
                 {
