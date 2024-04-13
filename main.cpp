@@ -1,20 +1,21 @@
-
 // Task: CS112_A3_Part1_S19-20_20230026_20230108_20230133.cpp
-// Part-1: 18 filters implemented
-// Filters implemented by Ahmed Atef Adel | ID : 20230026: Merge filter , Darken filter-Lighten filter , Grayscale Filter , Detect Image edges Filter , Violet Effect Filter, Infrared Filter , Sepia Filter
-// Filters implemented by Juliano Joseph Kamal | ID: 20230108: Crop Filter , Black and White Filter , Oil paint Filter , Flip filter , Resize filter.
-// Filters implemented by Dany Ashraf Eryan | ID: 20230133: Invert Filter , Rotate Filter ,
+// Part-1: 8 filters implemented
+// Filters implemented by Ahmed Atef Adel | ID : 20230026: Merge filter , Darken filter-Lighten filter , Grayscale Filter , Detect Image edges Filter
+// Filters implemented by Juliano Joseph Kamal | ID: 20230108: Crop Filter , Black and White Filter
+// Filters implemented by Dany Ashraf Eryan | ID: 20230133: Invert Filter , Rotate Filter
 //  Menu implemented by Dany Ashraf Eryan - 20230133 , Ahmed Atef Adel - 20230026
 // Version : 4.0
 #include <iostream>
 #include "Image_Class.h"
 #include <string>
 #include <cmath>
-#include <vector>
-#include <algorithm>
 #include <limits>
 #include <ios>
+#include <vector>
+#include <algorithm>
+
 using namespace std;
+void menu();
 Image save_photo(Image &image)
 {
     string save, save_type;
@@ -38,6 +39,7 @@ Image save_photo(Image &image)
 
     save = save + "." + save_type;
     image.saveImage(save);
+    menu();
 }
 Image blur(Image &image)
 {
@@ -209,7 +211,6 @@ Image resize(Image &image)
 
     return image2;
 }
-
 Image sunlight(Image &image)
 {
     for (int i = 0; i < image.width; ++i)
@@ -1012,9 +1013,12 @@ void menu()
     string name;
     int choice, no_filter;
     Image image;
-
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cout << "__Welcome to mini photoshop__" << endl;
     cout << "What's your name? ";
+
     getline(cin, name);
+
     cout << "Hello Dr, " << name << endl;
 
     while (true)
@@ -1093,6 +1097,7 @@ void menu()
                 else if (choice == 2)
                 {
                     save_photo(image);
+                    break;
                 }
                 else
                 {
