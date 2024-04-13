@@ -38,8 +38,33 @@ Image save_photo(Image &image)
     }
 
     save = save + "." + save_type;
+
     image.saveImage(save);
-    menu();
+
+    cout << "Image saved as " << save << endl;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    int n;
+    cout << "1-Continue\n2-Exit" << endl;
+
+    while (true)
+    {
+        cin >> n;
+        if (n == 1)
+        {
+
+            menu(); // Call the menu function to return to the main menu
+            break;
+        }
+        else if (n == 2)
+        {
+            break; // Exit the function
+        }
+        else
+        {
+            cout << "Invalid input. Please enter 1 to continue or 2 to exit." << endl;
+        }
+    }
 }
 Image blur(Image &image)
 {
@@ -1013,7 +1038,7 @@ void menu()
     string name;
     int choice, no_filter;
     Image image;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
     cout << "__Welcome to mini photoshop__" << endl;
     cout << "What's your name? ";
 
@@ -1097,7 +1122,7 @@ void menu()
                 else if (choice == 2)
                 {
                     save_photo(image);
-                    break;
+                    // Exit the loop after saving the photo
                 }
                 else
                 {
